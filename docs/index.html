@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trabajar con agentes de IA — Coloquio 2026</title>
+<style>
+  :root {
+    --bg: #0f1216;
+    --bg-2: #171c22;
+    --bg-3: #1f262e;
+    --line: #2b343e;
+    --text: #eef1f4;
+    --muted: #97a3b0;
+    --accent: #ff8a4c;
+    --accent-2: #6ee0c1;
+    --warn: #ffd166;
+    --bad: #ff6b6b;
+    --font: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; color: var(--text); font-family: var(--font); overflow: hidden; }
+
+  #stage {
+    position: absolute; left: 50%; top: 50%;
+    width: 1280px; height: 720px;
+    background: var(--bg);
+    transform-origin: center center;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    padding: 56px 76px 64px;
+    display: none; flex-direction: column;
+  }
+  .slide.active { display: flex; animation: in .35s ease; }
+  @keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .kicker { font: 600 15px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  h1 { font-size: 66px; line-height: 1.04; letter-spacing: -.02em; font-weight: 800; }
+  h2 { font-size: 40px; line-height: 1.12; letter-spacing: -.01em; font-weight: 750; margin-bottom: 26px; }
+  h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  p, li { font-size: 22px; line-height: 1.42; color: var(--text); }
+  .muted { color: var(--muted); }
+  .sm { font-size: 17px; }
+  .accent { color: var(--accent); }
+  .green { color: var(--accent-2); }
+  .grow { flex: 1; }
+  .center { justify-content: center; }
+  ul { list-style: none; }
+  ul.bul li { padding-left: 26px; position: relative; margin-bottom: 10px; }
+  ul.bul li::before { content: ""; position: absolute; left: 0; top: .6em; width: 10px; height: 10px; border-radius: 3px; background: var(--accent); }
+
+  .cols { display: grid; gap: 22px; }
+  .c2 { grid-template-columns: 1fr 1fr; }
+  .c3 { grid-template-columns: repeat(3, 1fr); }
+  .c4 { grid-template-columns: repeat(4, 1fr); }
+  .c5 { grid-template-columns: repeat(5, 1fr); }
+  .card { background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+  .card p, .card li { font-size: 18px; }
+  .card .num { font: 800 34px var(--mono); color: var(--accent); margin-bottom: 6px; }
+  .card.hl { border-color: var(--accent); background: linear-gradient(180deg, #2a1d15, var(--bg-2)); }
+  .card.ok { border-color: var(--accent-2); }
+  .card.no { border-color: var(--bad); }
+  .tag { display: inline-block; font: 600 13px var(--mono); padding: 3px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); margin-bottom: 10px; }
+  .tag.green { color: var(--accent-2); border-color: var(--accent-2); }
+  .tag.orange { color: var(--accent); border-color: var(--accent); }
+
+  .band { display: grid; grid-template-columns: 210px 1fr; gap: 24px; align-items: center; background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 24px; margin-bottom: 12px; }
+  .band h3 { margin-bottom: 2px; }
+  .band .sub { font-size: 15px; color: var(--muted); line-height: 1.35; }
+  .band .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { display: inline-block; padding: 8px 16px; border-radius: 10px; background: var(--bg-3); border: 1px solid var(--line); font-size: 18px; font-weight: 600; }
+  .chip small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .chip.mine { border-color: var(--accent); }
+  .chip.sm { font-size: 15px; padding: 5px 12px; font-weight: 500; }
+  code { font: 15px var(--mono); background: var(--bg-3); border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; color: var(--accent-2); }
+  ol.steps { list-style: none; counter-reset: s; }
+  ol.steps li { counter-increment: s; position: relative; padding-left: 40px; margin-bottom: 9px; font-size: 17px; line-height: 1.35; }
+  ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #1b0f07; font: 700 15px var(--mono); text-align: center; line-height: 26px; }
+  .card .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .link { text-align: center; font: 600 14px var(--mono); color: var(--muted); margin: -4px 0 8px; letter-spacing: .06em; }
+  .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .node { background: var(--bg-3); border: 1px solid var(--line); border-radius: 12px; padding: 12px 18px; font-size: 19px; font-weight: 600; }
+  .node.hl { border-color: var(--accent); color: var(--accent); }
+  .arrow { color: var(--muted); font-size: 26px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font: 600 14px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  td { font-size: 19px; padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { font-weight: 700; }
+
+  pre, .prompt { font: 16.5px/1.5 var(--mono); background: #0a0d10; border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; white-space: pre-wrap; color: #d5dde5; }
+  .prompt.bad { border-color: var(--bad); }
+  .prompt.good { border-color: var(--accent-2); }
+  .prompt b { color: var(--accent); font-weight: 600; }
+
+  .quote { font-size: 34px; line-height: 1.25; font-weight: 700; letter-spacing: -.01em; border-left: 6px solid var(--accent); padding-left: 26px; }
+  .foot { position: absolute; left: 76px; right: 76px; bottom: 22px; display: flex; justify-content: space-between; font: 13px var(--mono); color: #5d6874; }
+
+  .btn { font: 600 18px var(--font); background: var(--accent); color: #1b0f07; border: 0; border-radius: 10px; padding: 10px 22px; cursor: pointer; }
+  .btn.alt { background: var(--bg-3); color: var(--text); border: 1px solid var(--line); }
+  .links { margin-top: 26px; }
+  .links div { margin-top: 8px; font: 19px var(--mono); }
+  .links b { display: inline-block; width: 170px; color: var(--muted); font-weight: 600; }
+  .links a { color: var(--accent-2); text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
+  .timer { font: 800 64px var(--mono); color: var(--accent-2); }
+
+  #bar { position: fixed; left: 0; top: 0; height: 4px; background: var(--accent); width: 0; z-index: 9; transition: width .25s; }
+  #help { position: fixed; right: 14px; top: 10px; font: 12px var(--mono); color: #55606b; z-index: 9; transition: opacity 1s; }
+  #lang { position: fixed; left: 14px; top: 8px; z-index: 9; font: 600 12px var(--mono); color: #55606b; background: transparent; border: 1px solid #2b343e; border-radius: 99px; padding: 3px 10px; cursor: pointer; }
+  #lang:hover { border-color: var(--accent); }
+  #lang span { padding: 0 2px; }
+  #lang[data-lang="es"] [data-l="es"], #lang[data-lang="en"] [data-l="en"] { color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<button id="lang" type="button" data-lang="es" aria-label="Idioma / Language" title="Idioma / Language (L)"><span data-l="es">ES</span>|<span data-l="en">EN</span></button>
+<div id="help">← → navegar · F pantalla completa · L idioma</div>
+
+<div id="stage">
+
+<!-- 1 · PORTADA -->
+<section class="slide center" data-title="Portada">
+  <div class="kicker" data-en='4th University Colloquium on Technology and Education 2026'>4to. Coloquio Universitario de Tecnología y Educación 2026</div>
+  <h1 data-en='Working with<br><span class="accent">AI agents</span>'>Trabajar con<br><span class="accent">agentes de IA</span></h1>
+  <p class="muted" style="margin-top:26px;max-width:820px;font-size:26px" data-en='From chatting with an AI to delegating real work to it — and knowing when to trust the result.'>De chatear con una IA a delegarle trabajo real — y saber cuándo confiar en el resultado.</p>
+  <p style="margin-top:44px;font-size:24px;font-weight:700">Roberto Cervantes</p>
+  <p class="muted sm" data-en='Sr. Product Manager · robece@microsoft.com · September 30, 2026'>Sr. Product Manager · robece@microsoft.com · Septiembre 30, 2026</p>
+</section>
+
+<!-- 2 · ROMPEHIELOS -->
+<section class="slide center" data-title="Rompehielos">
+  <div class="kicker" data-en='To start'>Para empezar</div>
+  <div class="quote" data-en='Who has used an AI to get a task done?<br><span class="muted">And who has asked it to do something <span class="accent">on its own</span>, several steps, without holding its hand?</span>'>¿Quién ha usado una IA para hacer una tarea?<br><span class="muted">¿Y quién le ha pedido que haga algo <span class="accent">por su cuenta</span>, varios pasos, sin ir de la mano?</span></div>
+</section>
+
+<!-- 3 · QUÉ SE VAN A LLEVAR -->
+<section class="slide" data-title="Qué te llevas">
+  <div class="kicker" data-en='Today’s goal'>Objetivo de hoy</div>
+  <h2 data-en='Three things you will take away'>Tres cosas que te vas a llevar</h2>
+  <div class="cols c3">
+    <div class="card"><div class="num">01</div><h3 data-en='A mental model'>Un modelo mental</h3><p data-en='What an agent really is, how it differs from a chatbot, and why that changes how you use it.'>Qué es realmente un agente, en qué se diferencia de un chatbot y por qué eso cambia cómo lo usas.</p></div>
+    <div class="card"><div class="num">02</div><h3 data-en='Five habits'>Cinco hábitos</h3><p data-en='Practices that work with any model and any tool, not just the trendy one.'>Prácticas que funcionan con cualquier modelo y cualquier herramienta, no solo con la de moda.</p></div>
+    <div class="card"><div class="num">03</div><h3 data-en='An exercise'>Un ejercicio</h3><p data-en='Something we do together today that you can repeat tomorrow with your own tasks.'>Algo que hacemos juntos hoy y que puedes repetir mañana con tus propias tareas.</p></div>
+  </div>
+  <p class="muted" style="margin-top:34px" data-en='Delegating, specifying, and verifying are the skills most asked for in a first job. Here you practice them.'>Delegar, especificar y verificar son las habilidades que más se piden en un primer empleo. Aquí las practicas.</p>
+</section>
+
+<!-- 4 · CHATBOT VS AGENTE -->
+<section class="slide" data-title="Chatbot vs agente">
+  <div class="kicker" data-en='Mental model · 1'>Modelo mental · 1</div>
+  <h2 data-en='Chatbot vs. agent'>Chatbot vs. agente</h2>
+  <div class="cols c2">
+    <div class="card">
+      <span class="tag">chatbot</span>
+      <h3 data-en='It answers you'>Te responde</h3>
+      <div class="flow" style="margin:14px 0 18px"><span class="node" data-en='Question'>Pregunta</span><span class="arrow">→</span><span class="node" data-en='Answer'>Respuesta</span></div>
+      <p class="muted" data-en='You copy, paste, test, and decide the next step. The work is still yours.'>Tú copias, pegas, pruebas y decides el siguiente paso. El trabajo sigue siendo tuyo.</p>
+    </div>
+    <div class="card hl">
+      <span class="tag orange" data-en='agent'>agente</span>
+      <h3 data-en='It works for you'>Trabaja por ti</h3>
+      <div class="flow" style="margin:14px 0 18px"><span class="node" data-en='Goal'>Objetivo</span><span class="arrow">→</span><span class="node hl" data-en='Think'>Piensa</span><span class="arrow">→</span><span class="node hl" data-en='Act'>Actúa</span><span class="arrow">→</span><span class="node hl" data-en='Observe'>Observa</span></div>
+      <p class="muted" data-en='It repeats the loop with real tools (files, terminal, web) until it finishes or asks you for help.'>Repite el ciclo con herramientas reales (archivos, terminal, web) hasta terminar o pedirte ayuda.</p>
+    </div>
+  </div>
+  <p style="margin-top:30px" class="accent" data-en='<b>The key difference:</b> the agent acts in the world. That is why permissions and verification matter so much.'><b>La diferencia clave:</b> el agente actúa en el mundo. Por eso importan tanto los permisos y la verificación.</p>
+</section>
+
+<!-- 5 · ANATOMÍA -->
+<section class="slide" data-title="Anatomía">
+  <div class="kicker" data-en='Mental model · 2'>Modelo mental · 2</div>
+  <h2 data-en='Anatomy of an agent'>Anatomía de un agente</h2>
+  <div class="cols c5">
+    <div class="card"><h3 data-en='Model'>Modelo</h3><p class="muted" data-en='The brain. It reasons and writes.'>El cerebro. Razona y escribe.</p></div>
+    <div class="card"><h3 data-en='Instructions'>Instrucciones</h3><p class="muted" data-en='Rules and context you give it.'>Reglas y contexto que le das.</p></div>
+    <div class="card"><h3 data-en='Tools'>Herramientas</h3><p class="muted" data-en='The hands: files, terminal, web.'>Las manos: archivos, terminal, web.</p></div>
+    <div class="card"><h3 data-en='Memory'>Memoria</h3><p class="muted" data-en='What it remembers between sessions.'>Lo que recuerda entre sesiones.</p></div>
+    <div class="card"><h3 data-en='Permissions'>Permisos</h3><p class="muted" data-en='What it is allowed to do.'>Lo que se le deja hacer.</p></div>
+  </div>
+  <div class="quote" style="margin-top:38px;font-size:28px" data-en='Treat it like a brilliant intern on their first day: <span class="accent">fast, tireless… and knowing nothing about your context.</span>'>Trátalo como a un practicante brillante en su primer día: <span class="accent">rápido, incansable… y sin saber nada de tu contexto.</span></div>
+</section>
+
+<!-- 6 · ORGANIZA ANTES DE DELEGAR -->
+<section class="slide" data-title="Organiza antes de delegar">
+  <div class="kicker" data-en='Mental model · 3'>Modelo mental · 3</div>
+  <h2 data-en='Organize before you delegate'>Organiza antes de delegar</h2>
+  <div class="cols c4">
+    <div class="card"><span class="tag orange" data-en='lives and grows'>vive y crece</span><h3 data-en='Documents'>Documentos</h3><p class="muted" data-en='Notes, reports, rules. Edited many times and maintained over time.'>Notas, informes, reglas. Se editan muchas veces y se mantienen.</p></div>
+    <div class="card"><span class="tag orange" data-en='has a goal'>tiene meta</span><h3 data-en='Projects'>Proyectos</h3><p class="muted" data-en='Several stages toward a result. They need a folder, context, and a plan.'>Varias etapas hacia un resultado. Piden carpeta, contexto y plan.</p></div>
+    <div class="card"><span class="tag green" data-en='one and done'>una vez y ya</span><h3 data-en='Temporary tasks'>Actividades temporales</h3><p class="muted" data-en='Summarize, translate, calculate. Nothing needs to be saved.'>Resumir, traducir, calcular. No hace falta guardar nada.</p></div>
+    <div class="card"><span class="tag green" data-en='visual context'>contexto visual</span><h3 data-en='Images'>Imágenes</h3><p class="muted" data-en='Screenshots, diagrams, photos. Input or output that clarifies what text cannot.'>Capturas, diagramas, fotos. Entrada o salida que aclara lo que el texto no.</p></div>
+  </div>
+  <div class="flow" style="margin-top:34px;gap:16px">
+    <span class="node">Idea</span><span class="arrow">→</span>
+    <span class="node" data-en='Note'>Nota</span><span class="arrow">→</span>
+    <span class="node hl" data-en='Document'>Documento</span><span class="arrow">→</span>
+    <span class="node hl" data-en='Project'>Proyecto</span>
+  </div>
+  <p class="muted" style="margin-top:14px" data-en='Ideas grow progressively: not everything starts as a project.'>Las ideas crecen de forma progresiva: no todo nace como proyecto.</p>
+  <p style="margin-top:22px" class="accent" data-en='<b>Before writing the first message, ask:</b> what kind of work is this?'><b>Antes de escribir el primer mensaje, pregunta:</b> ¿qué tipo de trabajo es este?</p>
+</section>
+
+<!-- 7 · MODELOS: NUBE VS LOCAL -->
+<section class="slide" data-title="Nube vs local">
+  <div class="kicker" data-en='The tools · models'>Las herramientas · modelos</div>
+  <h2 data-en='Cloud or local: it is not a religion, it is a decision'>Nube o local: no es una religión, es una decisión</h2>
+  <div class="cols c2">
+    <div class="card">
+      <span class="tag orange" data-en='cloud · Claude, GitHub Copilot, Gemini'>nube · Claude, GitHub Copilot, Gemini</span>
+      <ul class="bul" style="margin-top:6px">
+        <li data-en='More capable on long, hard tasks'>Más capaz en tareas largas y difíciles</li>
+        <li data-en='Ready-to-use agent (edits files, runs tests)'>Agente listo para usar (edita archivos, corre pruebas)</li>
+        <li class="muted" data-en='Costs money and needs internet'>Cuesta dinero y necesita internet</li>
+        <li class="muted" data-en='Your data travels to a third party'>Tus datos viajan a un tercero</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag green" data-en='local · Qwen with Ollama'>local · Qwen con Ollama</span>
+      <ul class="bul" style="margin-top:6px">
+        <li data-en='Your data never leaves your computer'>Tus datos nunca salen de tu computadora</li>
+        <li data-en='No per-use cost, works offline'>Sin costo por uso, funciona sin internet</li>
+        <li class="muted" data-en='Less capable; depends on your hardware'>Menos capaz; depende de tu hardware</li>
+        <li class="muted" data-en='More work to set up yourself'>Más trabajo para armarlo tú</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:28px" data-en='<b class="green">Rule of thumb:</b> sensitive data → local. Hard reasoning or a large project → cloud. I use both.'><b class="green">Regla práctica:</b> datos sensibles → local. Razonamiento difícil o proyecto grande → nube. Yo uso ambos.</p>
+</section>
+
+<!-- 8 · AGENTES, LLMs Y MODELOS -->
+<section class="slide" data-title="Agentes, LLMs y modelos">
+  <div class="kicker" data-en='The tools · the map'>Las herramientas · el mapa</div>
+  <h2 data-en='Agents, LLMs, and models: three layers'>Agentes, LLMs y modelos: tres capas</h2>
+  <div class="band">
+    <div><h3 data-en='Agents'>Agentes</h3><div class="sub" data-en='What you use. Does the work.'>Lo que usas. Hace el trabajo.</div></div>
+    <div class="chips">
+      <span class="chip mine" data-en='Claude Code<small>App and CLI</small>'>Claude Code<small>App y CLI</small></span>
+      <span class="chip" data-en='GitHub Copilot<small>App and CLI</small>'>GitHub Copilot<small>App y CLI</small></span>
+      <span class="chip" data-en='Gemini<small>App and CLI</small>'>Gemini<small>App y CLI</small></span>
+    </div>
+  </div>
+  <div class="link" data-en='USE AN ↓'>USAN UN ↓</div>
+  <div class="band">
+    <div><h3>LLMs</h3><div class="sub" data-en='Large Language Model. The brain.'>Large Language Model (modelo de lenguaje grande). El cerebro.</div></div>
+    <div class="chips">
+      <span class="chip mine" data-en='Claude<small>Anthropic · cloud</small>'>Claude<small>Anthropic · nube</small></span>
+      <span class="chip" data-en='GPT<small>OpenAI · cloud</small>'>GPT<small>OpenAI · nube</small></span>
+      <span class="chip" data-en='Gemini<small>Google · cloud</small>'>Gemini<small>Google · nube</small></span>
+      <span class="chip mine" data-en='Qwen<small>Alibaba · open, local</small>'>Qwen<small>Alibaba · abierto, local</small></span>
+      <span class="chip" data-en='Llama<small>Meta · open, local</small>'>Llama<small>Meta · abierto, local</small></span>
+    </div>
+  </div>
+  <div class="link" data-en='COME IN ↓'>SE PRESENTAN EN ↓</div>
+  <div class="band">
+    <div><h3 data-en='Models'>Modelos</h3><div class="sub" data-en='Specific versions: size and specialty.'>Versiones concretas: tamaño y especialidad.</div></div>
+    <div class="chips">
+      <span class="chip mine">Claude<small>Haiku · Sonnet · Opus · Fable</small></span>
+      <span class="chip mine">Qwen<small>3:8b · 3.6:35b-a3b · 3.8:27b</small></span>
+      <span class="chip">Gemini<small>Pro · Flash</small></span>
+      <span class="chip" data-en='Whisper<small>speech to text</small>'>Whisper<small>voz a texto</small></span>
+    </div>
+  </div>
+  <p class="muted sm" style="margin-top:6px" data-en='Orange border: what I use. To run local models you need an execution engine, such as Ollama.'>Con borde naranja: lo que yo uso. Para correr modelos locales necesitas un motor de ejecución, como Ollama.</p>
+</section>
+
+<!-- 9 · MODELOS POR ROL -->
+<section class="slide" data-title="Modelos por rol">
+  <div class="kicker" data-en='The tools · by role'>Las herramientas · por rol</div>
+  <h2 data-en='Different models for different roles'>Distintos modelos para distintos roles</h2>
+  <table>
+    <tr><th style="width:270px" data-en='Role'>Rol</th><th style="width:360px" data-en='Model'>Modelo</th><th data-en='Example tasks'>Tareas de ejemplo</th></tr>
+    <tr><td data-en='Architect and reviewer'>Arquitecto y revisor</td><td class="accent">Fable 5.1 · Opus 5.5</td><td class="muted" data-en='Design the structure and the plan; check that what was built meets the design'>Diseñar la estructura y el plan; revisar que lo construido cumple el diseño</td></tr>
+    <tr><td data-en='Programmer and reviewer'>Programador y revisor</td><td class="accent">Sonnet 5.5</td><td class="muted" data-en='Implement the plan, write tests, fix bugs'>Implementar el plan, escribir pruebas, corregir errores</td></tr>
+    <tr><td data-en='Local programmer and reviewer'>Programador y revisor local</td><td class="green">Qwen 3.6:35b-a3b · 3.8:27b</td><td class="muted" data-en='Code and data that cannot leave my machine'>Código y datos que no pueden salir de mi equipo</td></tr>
+    <tr><td data-en='Quick tasks'>Tareas rápidas</td><td class="accent">Haiku 4.5 · <span class="green">Qwen 3:8b</span></td><td class="muted" data-en='Classify, rename, summarize, first passes'>Clasificar, renombrar, resumir, primeras pasadas</td></tr>
+    <tr><td data-en='Long documents'>Documentos largos</td><td class="accent">Gemini Pro · Flash</td><td class="muted" data-en='Read a full report, summarize it, and compare it with another'>Leer un informe completo, resumirlo y compararlo con otro</td></tr>
+    <tr><td data-en='Speech to text'>Voz a texto</td><td class="green">Whisper</td><td class="muted" data-en='Transcribe classes, interviews, and meetings'>Transcribir clases, entrevistas y reuniones</td></tr>
+  </table>
+  <p class="muted sm" style="margin-top:18px" data-en='<span class="accent">Orange:</span> cloud. <span class="green">Green:</span> local. The agent is the same; the model changes with the role.'><span class="accent">Naranja:</span> nube. <span class="green">Verde:</span> local. El agente es el mismo; cambia el modelo según el rol.</p>
+</section>
+
+<!-- 8 · CASOS NO-CÓDIGO -->
+<section class="slide" data-title="Casos reales">
+  <div class="kicker" data-en='Real cases · four types of work'>Casos reales · cuatro tipos de trabajo</div>
+  <h2 data-en='What I have done with agents'>Lo que he hecho con agentes</h2>
+  <div class="cols c2" style="gap:16px">
+    <div class="card"><span class="tag orange" data-en='with code'>con código</span><h3 data-en='Apps and services'>Apps y servicios</h3><p class="muted" data-en='Software that runs on its own and solves a problem of mine.'>Software que corre solo y resuelve un problema mío.</p>
+      <div class="chips"><span class="chip sm" data-en='Garmin watch'>Reloj Garmin</span><span class="chip sm" data-en='Email'>Correo</span><span class="chip sm" data-en='Service integration'>Integración de servicios</span><span class="chip sm" data-en='Monitoring'>Monitoreo</span><span class="chip sm" data-en='Retro: classic hardware'>Retro: hardware clásico</span></div></div>
+    <div class="card"><span class="tag green" data-en='no code'>sin código</span><h3 data-en='Documents'>Documentos</h3><p class="muted" data-en='Ideas that turn into organized text.'>Ideas que se convierten en texto ordenado.</p>
+      <div class="chips"><span class="chip sm" data-en='Documentation'>Documentación</span><span class="chip sm" data-en='Presentations'>Presentaciones</span><span class="chip sm" data-en='Guides and processes'>Guías y procesos</span><span class="chip sm" data-en='ERP discovery'>Descubrimiento de un ERP</span></div></div>
+    <div class="card"><span class="tag green" data-en='data'>datos</span><h3 data-en='Data analytics'>Analítica de datos</h3><p class="muted" data-en='From loose files to answers.'>De archivos sueltos a respuestas.</p>
+      <div class="chips"><span class="chip sm" data-en='Trading dashboard'>Panel de trading</span><span class="chip sm" data-en='Photos and video by face and scene'>Fotos y video por rostro y escena</span><span class="chip sm" data-en='PDF reports to trends'>Reportes PDF a tendencias</span></div></div>
+    <div class="card"><span class="tag orange" data-en='custom-made'>a mi medida</span><h3 data-en='Custom tools'>Herramientas a la medida</h3><p class="muted" data-en='Small utilities for real annoyances.'>Pequeñas utilidades para molestias reales.</p>
+      <div class="chips"><span class="chip sm" data-en='Clean junk files on the Mac'>Limpiar archivos basura del Mac</span><span class="chip sm" data-en='Compare two folders'>Comparar dos carpetas</span><span class="chip sm" data-en='Check the status of my projects'>Revisar el estado de mis proyectos</span><span class="chip sm" data-en='Homemade remote control'>Control remoto casero</span></div></div>
+  </div>
+  <p class="muted" style="margin-top:18px" data-en='Common pattern: I bring the judgment and the decisions; the agent brings the speed.'>Patrón común: yo pongo el criterio y las decisiones; el agente pone la velocidad.</p>
+</section>
+
+<!-- 9 · HÁBITO 1 -->
+<section class="slide" data-title="Hábito 1 · Contexto">
+  <div class="kicker" data-en='Habit 1 of 5'>Hábito 1 de 5</div>
+  <h2 data-en='Give it context — and write it only once'>Dale contexto — y escríbelo una sola vez</h2>
+  <div class="cols c2">
+    <div><span class="tag" style="color:var(--bad);border-color:var(--bad)" data-en='vague'>vago</span>
+      <div class="prompt bad" data-en='Help me with my internship report.'>Ayúdame con mi reporte de prácticas.</div>
+      <p class="muted sm" style="margin-top:12px" data-en='It does not know how many pages, for whom, or what you did. It fills the gaps by guessing… and guesses wrong.'>No sabe cuántas páginas, para quién ni qué hiciste. Rellena los huecos adivinando… y adivina mal.</p></div>
+    <div><span class="tag green" data-en='with context'>con contexto</span>
+      <div class="prompt good" data-en='<b>Who I am:</b> 8th-semester student, with an internship in logistics.
+<b>What I need:</b> my final 8-page report for my advisor.
+<b>Material:</b> my weekly notes, pasted below.
+<b>Rules:</b> use only my notes; if a fact is missing, ask me.
+<b>Format:</b> introduction, activities, results, lessons learned.'><b>Quién soy:</b> estudiante de 8.º semestre, con prácticas en logística.
+<b>Qué necesito:</b> mi reporte final de 8 páginas para mi asesor.
+<b>Material:</b> mis notas semanales, pegadas abajo.
+<b>Reglas:</b> usa solo mis notas; si falta un dato, pregúntame.
+<b>Formato:</b> introducción, actividades, resultados, aprendizajes.</div></div>
+  </div>
+  <p style="margin-top:24px" data-en='Whatever you repeat in every conversation, save it in an <b class="accent">instructions file</b>. The agent reads it by itself.'>Lo que repites en cada conversación, guárdalo en un <b class="accent">archivo de instrucciones</b>. El agente lo lee solo.</p>
+</section>
+
+<!-- 10 · HÁBITO 2 -->
+<section class="slide" data-title="Hábito 2 · Define terminado">
+  <div class="kicker" data-en='Habit 2 of 5'>Hábito 2 de 5</div>
+  <h2 data-en='Ask for the result, and define when it is "done"'>Pide el resultado, y define cuándo está "terminado"</h2>
+  <div class="cols c4">
+    <div class="card"><div class="num">1</div><h3 data-en='Goal'>Objetivo</h3><p data-en='What do I want to achieve, in one sentence?'>¿Qué quiero lograr, en una frase?</p></div>
+    <div class="card"><div class="num">2</div><h3 data-en='Context'>Contexto</h3><p data-en='What does it need to know so it does not guess?'>¿Qué necesita saber para no adivinar?</p></div>
+    <div class="card"><div class="num">3</div><h3 data-en='Constraints'>Restricciones</h3><p data-en='What must it NOT do or touch?'>¿Qué NO debe hacer o tocar?</p></div>
+    <div class="card"><div class="num">4</div><h3 data-en='Success criteria'>Criterio de éxito</h3><p data-en='How will we know it turned out well?'>¿Cómo sabremos que quedó bien?</p></div>
+  </div>
+  <div class="prompt" style="margin-top:28px" data-en='<b>Goal:</b> summarize these 3 articles in a comparison table.
+<b>Constraints:</b> use only what the articles say; if it is not there, say "not found".
+<b>Done when:</b> each cell cites the paragraph it came from.'><b>Objetivo:</b> resume estos 3 artículos en una tabla comparativa.
+<b>Restricciones:</b> usa solo lo que dicen los artículos; si no está, di "no aparece".
+<b>Terminado cuando:</b> cada celda cita el párrafo de donde salió.</div>
+</section>
+
+<!-- 11 · HÁBITO 3 -->
+<section class="slide" data-title="Hábito 3 · Verifica">
+  <div class="kicker" data-en='Habit 3 of 5'>Hábito 3 de 5</div>
+  <h2 data-en='Verify. Always.'>Verifica. Siempre.</h2>
+  <div class="cols c2">
+    <div>
+      <div class="quote" style="font-size:28px" data-en='An agent can sound completely sure <span class="accent">and be wrong.</span>'>Un agente puede sonar completamente seguro <span class="accent">y estar equivocado.</span></div>
+      <p class="muted" style="margin-top:22px" data-en='A true story: I asked it to update a configuration. It rebuilt the values <b>from memory</b> and overwrote, without warning, data I had already set. Everything "worked"… until information went missing.'>Historia real: le pedí actualizar una configuración. Reconstruyó los valores <b>de memoria</b> y sobrescribió, sin avisar, datos que yo ya había puesto. Todo "funcionó"… hasta que faltó información.</p>
+    </div>
+    <div class="card ok">
+      <h3 class="green" data-en='How I verify'>Cómo verifico</h3>
+      <ul class="bul">
+        <li data-en='I ask for evidence: the source, the command, the test'>Pido evidencia: la fuente, el comando, la prueba</li>
+        <li data-en='I read the change (the "diff") before accepting it'>Leo el cambio (el "diff") antes de aceptarlo</li>
+        <li data-en='I check against the original source'>Compruebo contra la fuente original</li>
+        <li data-en='If it is critical, I test it myself'>Si es crítico, lo pruebo yo mismo</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · HÁBITO 4 -->
+<section class="slide" data-title="Hábito 4 · Límites">
+  <div class="kicker" data-en='Habit 4 of 5'>Hábito 4 de 5</div>
+  <h2 data-en='Set limits: can ≠ should'>Pon límites: puede ≠ debe</h2>
+  <div class="cols c3">
+    <div class="card ok"><span class="tag green" data-en='free'>libre</span><h3 data-en='Read'>Leer</h3><p data-en='Explore files, search, analyze. Low risk.'>Explorar archivos, buscar, analizar. Bajo riesgo.</p></div>
+    <div class="card"><span class="tag orange" data-en='with care'>con cuidado</span><h3 data-en='Write locally'>Escribir local</h3><p data-en='Create and edit on your machine. Reversible if you keep a backup.'>Crear y editar en tu máquina. Reversible si llevas respaldo.</p></div>
+    <div class="card no"><span class="tag" style="color:var(--bad);border-color:var(--bad)" data-en='ask first'>pregunta antes</span><h3 data-en='External actions'>Acciones externas</h3><p data-en='Publish, send, delete, spend. Hard or impossible to undo.'>Publicar, enviar, borrar, gastar. Difícil o imposible de deshacer.</p></div>
+  </div>
+  <ul class="bul" style="margin-top:28px">
+    <li data-en='My rules: <b>always ask before pushing changes</b>; read-only tools for my email.'>Mis reglas: <b>siempre pregunta antes de subir cambios</b>; herramientas de solo lectura para mi correo.</li>
+    <li data-en='<b class="accent">Never</b> paste passwords, tokens, or other people’s data into a chat or file.'><b class="accent">Nunca</b> pegues contraseñas, tokens ni datos ajenos en un chat o archivo.</li>
+  </ul>
+</section>
+
+<!-- 13 · HÁBITO 5 -->
+<section class="slide" data-title="Hábito 5 · Tú decides">
+  <div class="kicker" data-en='Habit 5 of 5'>Hábito 5 de 5</div>
+  <h2 data-en='You decide, the agent executes'>Tú decides, el agente ejecuta</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3 data-en='Yours (judgment)'>Tuyo (criterio)</h3>
+      <ul class="bul"><li data-en='Which problem is worth solving'>Qué problema vale la pena resolver</li><li data-en='How it should look and feel'>Cómo debe verse y sentirse</li><li data-en='Which risks you accept'>Qué riesgos aceptas</li><li data-en='When something is "good enough"'>Cuándo algo está "suficientemente bien"</li></ul>
+    </div>
+    <div class="card hl">
+      <h3 data-en='The agent’s (execution)'>Del agente (ejecución)</h3>
+      <ul class="bul"><li data-en='Explore options quickly'>Explorar opciones rápido</li><li data-en='Write the first draft'>Escribir el primer borrador</li><li data-en='Repetitive, tedious tasks'>Tareas repetitivas y tediosas</li><li data-en='Check consistency'>Revisar consistencia</li></ul>
+    </div>
+  </div>
+  <p style="margin-top:26px" data-en='If the agent reaches a decision that is yours, the right thing is for it to <b class="accent">ask you</b>. If it does not, correct it and turn it into a rule.'>Si el agente llega a una decisión que es tuya, lo correcto es que <b class="accent">te pregunte</b>. Si no lo hace, corrígelo y conviértelo en regla.</p>
+</section>
+
+<!-- 14 · MEMORIA -->
+<section class="slide" data-title="Memoria">
+  <div class="kicker" data-en='Let it learn with you'>Que aprenda contigo</div>
+  <h2 data-en='Every correction is a future rule'>Cada corrección es una regla futura</h2>
+  <div class="flow" style="margin-bottom:30px">
+    <span class="node" data-en='I get it wrong / you correct me'>Me equivoco / me corriges</span><span class="arrow">→</span>
+    <span class="node hl" data-en='It is written down as a rule'>Se escribe como regla</span><span class="arrow">→</span>
+    <span class="node" data-en='It is loaded next session'>Se carga la próxima sesión</span><span class="arrow">→</span>
+    <span class="node" data-en='It does not happen again'>No se repite</span>
+  </div>
+  <div class="cols c3">
+    <div class="card"><span class="tag" data-en='level 1'>nivel 1</span><h3 data-en='Rules file'>Archivo de reglas</h3><p data-en='Plain text the agent always reads. Start here.'>Texto plano que el agente lee siempre. Empieza aquí.</p></div>
+    <div class="card"><span class="tag" data-en='level 2'>nivel 2</span><h3 data-en='Session memory'>Memoria de sesiones</h3><p data-en='Notes on what was learned, organized and reviewable.'>Notas de lo aprendido, ordenadas y revisables.</p></div>
+    <div class="card"><span class="tag" data-en='level 3'>nivel 3</span><h3 data-en='Search by meaning'>Búsqueda por significado</h3><p data-en='RAG: finding what is relevant across many documents.'>RAG: encontrar lo relevante en muchos documentos.</p></div>
+  </div>
+</section>
+
+<!-- 15 · CICLO -->
+<section class="slide center" data-title="Ciclo de trabajo">
+  <div class="kicker" data-en='Summary'>Resumen</div>
+  <h2 data-en='A work cycle you can repeat'>Un ciclo de trabajo que puedes repetir</h2>
+  <div class="flow" style="gap:16px;margin:10px 0 34px">
+    <span class="node hl" data-en='1 · Explore'>1 · Explorar</span><span class="arrow">→</span>
+    <span class="node hl" data-en='2 · Plan'>2 · Planear</span><span class="arrow">→</span>
+    <span class="node hl" data-en='3 · Execute'>3 · Ejecutar</span><span class="arrow">→</span>
+    <span class="node hl" data-en='4 · Verify'>4 · Verificar</span><span class="arrow">→</span>
+    <span class="node hl" data-en='5 · Document'>5 · Documentar</span>
+  </div>
+  <ul class="bul">
+    <li data-en='<b>Explore:</b> have it read and understand first, before touching anything.'><b>Explorar:</b> que primero lea y entienda antes de tocar nada.</li>
+    <li data-en='<b>Plan:</b> ask for the plan and approve it before it executes.'><b>Planear:</b> pide el plan y apruébalo antes de que ejecute.</li>
+    <li data-en='<b>Verify:</b> evidence, not promises.'><b>Verificar:</b> evidencia, no promesas.</li>
+    <li data-en='<b>Document:</b> what was learned goes into the rules.'><b>Documentar:</b> lo aprendido pasa a las reglas.</li>
+  </ul>
+</section>
+
+<!-- 16 · ACTIVIDAD -->
+<section class="slide" data-title="Actividad">
+  <div class="kicker" data-en='Live demo · 2 min'>Demo en vivo · 2 min</div>
+  <h2 data-en='Let us tidy a disaster folder'>Ordenemos una carpeta desastre</h2>
+  <div class="cols c2">
+    <div>
+      <p data-en='A Downloads folder with 40 mixed files: PDFs, photos, screenshots, spreadsheets, and installers.'>Una carpeta de Descargas con 40 archivos mezclados: PDFs, fotos, capturas, hojas de cálculo e instaladores.</p>
+      <div class="prompt good" style="margin-top:18px" data-en='<b>Goal:</b> organize this folder into subfolders by type.
+<b>Rules:</b> do not delete or rename anything; show me the plan first.
+<b>Done when:</b> the same files exist before and after.
+<b>Limit:</b> work only inside the downloads-demo folder.'><b>Objetivo:</b> ordena esta carpeta en subcarpetas por tipo.
+<b>Reglas:</b> no borres ni renombres nada; primero muéstrame el plan.
+<b>Terminado cuando:</b> hay los mismos archivos antes y después.
+<b>Límite:</b> trabaja solo dentro de la carpeta downloads-demo.</div>
+    </div>
+    <div class="card">
+      <h3 data-en='Steps'>Pasos</h3>
+      <ol class="steps">
+        <li data-en='<b>Open</b> Claude Code in the folder: <code>cd downloads-demo &amp;&amp; claude</code>'><b>Abrir</b> Claude Code en la carpeta: <code>cd downloads-demo &amp;&amp; claude</code></li>
+        <li data-en='<b>Paste</b> the prompt.'><b>Pegar</b> el prompt.</li>
+        <li data-en='It <b>explores</b> without touching anything and <b>proposes a plan</b>: I approve it.'><b>Explora</b> sin tocar nada y <b>propone un plan</b>: yo lo apruebo.</li>
+        <li data-en='It <b>executes</b> the changes.'><b>Ejecuta</b> los cambios.</li>
+        <li data-en='I <b>verify</b> the result: <code>python3 ../verify.py</code>'><b>Verifico</b> el resultado: <code>python3 ../verify.py</code></li>
+      </ol>
+    </div>
+  </div>
+  <div class="flow" style="margin-top:22px;gap:18px">
+    <span class="timer" data-min="2">02:00</span>
+    <button class="btn" onclick="startTimer(this, true)" data-en='Start'>Iniciar</button>
+    <button class="btn alt" onclick="startTimer(this, false)" data-en='Reset'>Reiniciar</button>
+  </div>
+</section>
+
+<!-- 19 · DEMO 2: VIDEOJUEGO -->
+<section class="slide" data-title="Demo: videojuego">
+  <div class="kicker" data-en='Live demo · 4 min'>Demo en vivo · 4 min</div>
+  <h2 data-en='Let us build a video game in minutes'>Creemos un videojuego en minutos</h2>
+  <div class="cols c2">
+    <div>
+      <p data-en='A 90s-style shooter that grows across three scenarios, each with its own HTML file that opens in the Mac’s browser.'>Un shooter estilo años 90 que crece en tres escenarios, cada uno con su propio archivo HTML que abre en el navegador de la Mac.</p>
+      <div class="prompt good" style="margin-top:18px" data-en='<span class="tag orange" style="margin-bottom:6px">scenario 1 of 3</span>
+<b>Goal:</b> a 3D corridor in classic shooter style (raycasting) in scenario-1.html.
+<b>Rules:</b> no libraries or internet; do not ask me questions, pick the simplest option.
+<b>Done when:</b> it opens in the browser and I can walk without going through walls.
+<b>Limit:</b> work only inside the game folder.'><span class="tag orange" style="margin-bottom:6px">escenario 1 de 3</span>
+<b>Objetivo:</b> un pasillo 3D estilo shooter clásico (raycasting) en escenario-1.html.
+<b>Reglas:</b> sin librerías ni internet; no me preguntes, elige lo más simple.
+<b>Terminado cuando:</b> abre en el navegador y puedo caminar sin atravesar paredes.
+<b>Límite:</b> trabaja solo dentro de la carpeta game.</div>
+    </div>
+    <div class="card">
+      <h3 data-en='Steps'>Pasos</h3>
+      <ol class="steps">
+        <li data-en='<b>Open</b> Claude Code in the game folder: <code>cd demo-2-doom/game &amp;&amp; claude</code>'><b>Abrir</b> Claude Code en la carpeta del juego: <code>cd demo-2-doom/game &amp;&amp; claude</code></li>
+        <li data-en='<b>Scenario 1:</b> paste <code>1-prompt-en</code>. A 3D corridor.'><b>Escenario 1:</b> pegar <code>1-prompt-es</code>. Un pasillo 3D.</li>
+        <li data-en='<b>Scenario 2:</b> paste <code>2-prompt-en</code>. Enemies that chase you.'><b>Escenario 2:</b> pegar <code>2-prompt-es</code>. Enemigos que te persiguen.</li>
+        <li data-en='<b>Scenario 3:</b> paste <code>3-prompt-en</code>. Shooting and victory.'><b>Escenario 3:</b> pegar <code>3-prompt-es</code>. Disparo y victoria.</li>
+        <li data-en='Each one creates its HTML, checks its code (<code>node --check</code>) and opens by itself.'>Cada uno crea su HTML, revisa su código (<code>node --check</code>) y se abre solo.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="flow" style="margin-top:22px;gap:18px">
+    <span class="timer" data-min="4">04:00</span>
+    <button class="btn" onclick="startTimer(this, true)" data-en='Start'>Iniciar</button>
+    <button class="btn alt" onclick="startTimer(this, false)" data-en='Reset'>Reiniciar</button>
+  </div>
+</section>
+
+<!-- 17 · ERRORES COMUNES -->
+<section class="slide" data-title="Errores comunes">
+  <div class="kicker" data-en='Common mistakes'>Errores comunes</div>
+  <h2 data-en='Mistakes you will make (and how to avoid them)'>Errores que vas a cometer (y cómo evitarlos)</h2>
+  <div class="cols c3">
+    <div class="card no"><h3 data-en='Trusting without checking'>Confiar sin revisar</h3><p class="muted" data-en='→ Always ask for evidence.'>→ Pide evidencia siempre.</p></div>
+    <div class="card no"><h3 data-en='One-line prompts'>Prompts de una línea</h3><p class="muted" data-en='→ Goal, context, constraints, criteria.'>→ Objetivo, contexto, restricciones, criterio.</p></div>
+    <div class="card no"><h3 data-en='Giving too much access'>Dar acceso de más</h3><p class="muted" data-en='→ Start read-only.'>→ Empieza en solo lectura.</p></div>
+    <div class="card no"><h3 data-en='Pasting secrets'>Pegar secretos</h3><p class="muted" data-en='→ Never passwords or other people’s data.'>→ Nunca contraseñas ni datos ajenos.</p></div>
+    <div class="card no"><h3 data-en='Delegating what you do not understand'>Delegar lo que no entiendes</h3><p class="muted" data-en='→ If you cannot evaluate it, do not delegate it yet.'>→ Si no puedes evaluarlo, no lo delegues aún.</p></div>
+    <div class="card no"><h3 data-en='Handing it in as your own without saying so'>Entregarlo como propio sin decirlo</h3><p class="muted" data-en='→ Be transparent about where you used AI.'>→ Sé transparente sobre dónde usaste IA.</p></div>
+  </div>
+</section>
+
+<!-- 18 · CARRERA -->
+<section class="slide" data-title="Tu carrera">
+  <div class="kicker" data-en='For your career'>Para tu carrera</div>
+  <h2 data-en='What is worth more when everyone has an agent'>Lo que vale más cuando todos tienen un agente</h2>
+  <div class="cols c2">
+    <ul class="bul">
+      <li data-en='<b>Communicating clearly</b> — writing a good brief'><b>Comunicar con claridad</b> — escribir un buen brief</li>
+      <li data-en='<b>Breaking down problems</b> — from "big and fuzzy" to steps'><b>Descomponer problemas</b> — de "grande y difuso" a pasos</li>
+      <li data-en='<b>Judgment and verification</b> — knowing when something is wrong'><b>Criterio y verificación</b> — saber cuándo algo está mal</li>
+    </ul>
+    <ul class="bul">
+      <li data-en='<b>Ethics and privacy</b> — what is shared and with whom'><b>Ética y privacidad</b> — qué se comparte y con quién</li>
+      <li data-en='<b>Learning fast</b> — the tools change every few months'><b>Aprender rápido</b> — las herramientas cambian cada pocos meses</li>
+      <li data-en='<b>Knowing your field deeply</b> — without a foundation, you cannot evaluate'><b>Conocer tu área a fondo</b> — sin base, no puedes evaluar</li>
+    </ul>
+  </div>
+  <div class="quote" style="margin-top:36px;font-size:30px" data-en='The agent amplifies what you already know how to do — <span class="accent">and also what you do not.</span>'>El agente amplifica lo que ya sabes hacer — <span class="accent">y también lo que no.</span></div>
+</section>
+
+<!-- 19 · LLÉVATELO -->
+<section class="slide" data-title="Checklist">
+  <div class="kicker" data-en='Take it with you'>Llévatelo</div>
+  <h2 data-en='Checklist before delegating'>Checklist antes de delegar</h2>
+  <div class="card" style="padding:28px 34px">
+    <ul style="font-size:24px">
+      <li style="margin-bottom:14px" data-en='☐ &nbsp;<b>Context:</b> did I tell it who I am, who it is for, and what tone to use?'>☐ &nbsp;<b>Contexto:</b> ¿le dije quién soy, para quién y en qué tono?</li>
+      <li style="margin-bottom:14px" data-en='☐ &nbsp;<b>Result:</b> did I define what "done" means?'>☐ &nbsp;<b>Resultado:</b> ¿definí qué es "terminado"?</li>
+      <li style="margin-bottom:14px" data-en='☐ &nbsp;<b>Plan:</b> did I ask for it and approve it before it ran?'>☐ &nbsp;<b>Plan:</b> ¿lo pedí y lo aprobé antes de que ejecutara?</li>
+      <li style="margin-bottom:14px" data-en='☐ &nbsp;<b>Limits:</b> what may it touch and what not? Are there secrets in view?'>☐ &nbsp;<b>Límites:</b> ¿qué puede tocar y qué no? ¿hay secretos a la vista?</li>
+      <li data-en='☐ &nbsp;<b>Verification:</b> do I have evidence, not just its word?'>☐ &nbsp;<b>Verificación:</b> ¿tengo evidencia, no solo su palabra?</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 20 · CIERRE -->
+<section class="slide center" data-title="Cierre">
+  <div class="kicker" data-en='Thank you'>Gracias</div>
+  <h1 data-en='Questions?'>¿Preguntas?</h1>
+  <p class="muted" style="margin-top:28px;font-size:26px" data-en='An agent is a brilliant intern with no context.<br>Your job: give it context, set limits, and review what it delivers.'>Un agente es un practicante brillante y sin contexto.<br>Tu trabajo: darle contexto, ponerle límites y revisar lo que entrega.</p>
+  <p style="margin-top:36px;font-size:22px;font-weight:700">Roberto Cervantes</p>
+  <p class="muted sm">Sr. Product Manager · robece@microsoft.com</p>
+  <div class="links">
+    <div><b data-en='Slides'>Presentación</b><a href="https://robece.github.io/learning-agents/" target="_blank" rel="noopener">robece.github.io/learning-agents</a></div>
+    <div><b data-en='Repository'>Repositorio</b><a href="https://github.com/robece/learning-agents" target="_blank" rel="noopener">github.com/robece/learning-agents</a></div>
+    <div><b>LinkedIn</b><a href="https://www.linkedin.com/in/robece" target="_blank" rel="noopener">linkedin.com/in/robece</a></div>
+  </div>
+</section>
+
+</div>
+
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var stage = document.getElementById('stage');
+  var bar = document.getElementById('bar');
+  var cur = 0;
+
+  slides.forEach(function (s, i) {
+    var f = document.createElement('div');
+    f.className = 'foot';
+    f.innerHTML = '<span>Trabajar con agentes de IA</span><span>' + (i + 1) + ' / ' + slides.length + '</span>';
+    if (i > 0) s.appendChild(f);
+  });
+
+  function fit() {
+    var k = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
+  }
+
+  function show(n) {
+    cur = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (s, i) { s.classList.toggle('active', i === cur); });
+    bar.style.width = ((cur + 1) / slides.length * 100) + '%';
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  var UI = {
+    es: { help: '← → navegar · F pantalla completa · L idioma', foot: 'Trabajar con agentes de IA', title: 'Trabajar con agentes de IA — Coloquio 2026' },
+    en: { help: '← → navigate · F full screen · L language', foot: 'Working with AI agents', title: 'Working with AI agents — Colloquium 2026' }
+  };
+  var langBtn = document.getElementById('lang');
+
+  function setLang(l) {
+    document.documentElement.lang = l;
+    langBtn.setAttribute('data-lang', l);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) {
+      if (el._es === undefined) el._es = el.innerHTML;
+      el.innerHTML = l === 'en' ? el.getAttribute('data-en') : el._es;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.foot span:first-child'), function (s) { s.textContent = UI[l].foot; });
+    document.getElementById('help').textContent = UI[l].help;
+    document.title = UI[l].title;
+    try { localStorage.setItem('lang', l); } catch (e) {}
+  }
+
+  function toggleLang() { setLang(langBtn.getAttribute('data-lang') === 'en' ? 'es' : 'en'); }
+  langBtn.addEventListener('click', toggleLang);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'l' || k === 'L') { toggleLang(); return; }
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ' || k === 'Enter') { e.preventDefault(); show(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp' || k === 'Backspace') { e.preventDefault(); show(cur - 1); }
+    else if (k === 'Home') show(0);
+    else if (k === 'End') show(slides.length - 1);
+    else if (k === 'f' || k === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('button, a')) return;
+    show(e.clientX < window.innerWidth / 3 ? cur - 1 : cur + 1);
+  });
+
+  window.startTimer = function (btn, run) {
+    var el = btn.closest('.flow').querySelector('.timer');
+    var mins = parseInt(el.getAttribute('data-min'), 10) || 4;
+    clearInterval(el._id);
+    var left = mins * 60;
+    function tick() {
+      var m = Math.floor(left / 60), s = left % 60;
+      el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      if (left-- <= 0) clearInterval(el._id);
+    }
+    if (!run) { el.textContent = '0' + mins + ':00'; return; }
+    tick();
+    el._id = setInterval(tick, 1000);
+  };
+
+  setTimeout(function () { document.getElementById('help').style.opacity = 0; }, 4000);
+  window.addEventListener('resize', fit);
+  fit();
+  show(parseInt(location.hash.slice(1), 10) - 1 || 0);
+
+  var saved = null;
+  try { saved = localStorage.getItem('lang'); } catch (e) {}
+  var fromUrl = /[?&]lang=(en|es)/.exec(location.search);
+  setLang(fromUrl ? fromUrl[1] : (saved === 'en' ? 'en' : 'es'));
+})();
+</script>
+</body>
+</html>

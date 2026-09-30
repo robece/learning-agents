@@ -1,0 +1,6 @@
+.DS_Store
+*.zip
+demo-1-organize/downloads-demo/
+demo-1-organize/manifest.json
+demo-2-doom/game/*
+!demo-2-doom/game/.gitkeep
