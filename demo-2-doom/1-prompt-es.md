@@ -1,4 +1,4 @@
-Construye el escenario 1 de BUNKER, un juego estilo shooter clásico de los 90: un pasillo en pseudo-3D (raycasting) por el que se puede caminar. Es la base; los escenarios 2 y 3 vendrán después.
+Construye el escenario 1 de BUNKER, un juego estilo shooter clásico de los 90: un laberinto en pseudo-3D (raycasting) por el que se puede caminar, con un minimapa 2D. Es la base; los escenarios 2 y 3 vendrán después.
 
 No hagas preguntas: si algo no está definido, elige lo más simple y sigue. Ve rápido, esto es una demo de pocos minutos. La única excepción es el límite de trabajo de abajo.
 
@@ -14,15 +14,16 @@ Tu única carpeta autorizada es:
 
 ## Entregable
 - Un archivo nuevo: `escenario-1.html` (HTML + CSS + JavaScript en el mismo archivo). Sin librerías, imágenes ni audio externos.
-- Máximo unas 150 líneas.
-- Al inicio del archivo, un comentario con: la idea del juego (2 líneas), "Escenario 1 de 3", los controles y la estructura del código (lista de secciones: mapa, jugador, render, bucle).
+- Máximo unas 190 líneas.
+- Al inicio del archivo, un comentario con: la idea del juego (2 líneas), "Escenario 1 de 3", los controles y la estructura del código (lista de secciones: mapa, jugador, render, minimapa, bucle).
 - En pantalla: el título "BUNKER · Escenario 1" y una línea con los controles.
 
 ## Qué debe tener (solo esto)
-1. Raycasting sobre un mapa de cuadrícula de 12x12 definido en el código.
+1. Raycasting sobre un mapa de cuadrícula de 12x12 con forma de laberinto (pasillos, esquinas y callejones), definido en el código.
 2. Paredes de 3 colores, más oscuras en las caras laterales y con la distancia. Cielo y piso de colores distintos.
 3. Movimiento con W y S (o flechas arriba y abajo), giro con A y D (o flechas izquierda y derecha), con colisión contra las paredes.
 4. Bucle con `requestAnimationFrame` y movimiento independiente de los cuadros por segundo.
+5. Un minimapa 2D en la parte inferior de la pantalla (unos 150x150 px, en la esquina inferior izquierda): dibuja el mapa completo con las paredes en color y muestra al jugador como un punto con una línea que indica hacia dónde mira. Se actualiza en cada cuadro.
 
 ## Proceso
 1. Plan de máximo 3 líneas y continúa sin esperar respuesta.
@@ -31,7 +32,7 @@ Tu única carpeta autorizada es:
 4. Abre el juego con `open escenario-1.html`.
 
 ## Terminado cuando
-El archivo abre en el navegador, se puede caminar y no se atraviesan las paredes.
+El archivo abre en el navegador, se puede caminar sin atravesar las paredes y el minimapa muestra al jugador moviéndose.
 
 ## Formato de respuesta
 Breve. Al final: los controles en 2 líneas.

@@ -1,4 +1,4 @@
-Build scenario 2 of BUNKER, a classic 90s-style shooter game: the pseudo-3D corridor from scenario 1, plus enemies that chase you, health, and game over.
+Build scenario 2 of BUNKER, a classic 90s-style shooter game: the pseudo-3D maze with a minimap from scenario 1, plus enemies that chase you, health, and game over.
 
 Do not ask questions: if something is not defined, pick the simplest option and keep going. Move fast, this is a demo of a few minutes. The only exception is the working limit below.
 
@@ -18,21 +18,22 @@ Your only authorized folder is:
 
 ## Deliverable
 - One new file: `scenario-2.html` (HTML + CSS + JavaScript in the same file). No libraries, images, or external audio.
-- At most about 230 lines in total.
-- At the top of the file, a comment with: the game idea (2 lines), "Scenario 2 of 3", the controls, and the code structure (list of sections: map, player, enemies, render, loop).
+- At most about 270 lines in total.
+- At the top of the file, a comment with: the game idea (2 lines), "Scenario 2 of 3", the controls, and the code structure (list of sections: map, player, enemies, render, minimap, loop).
 - On screen: the title "BUNKER · Scenario 2" and one line with the controls.
 
 ## Scenario 1 (base)
-1. Raycasting over a 12x12 grid map defined in the code.
+1. Raycasting over a 12x12 grid map shaped like a maze (corridors, corners, and dead ends), defined in the code.
 2. Walls in 3 colors, darker on the side faces and with distance. Sky and floor in different colors.
 3. Movement with W and S (or the up and down arrows), turning with A and D (or the left and right arrows), with collision against the walls.
 4. A `requestAnimationFrame` loop and movement independent of frames per second.
+5. A 2D minimap at the bottom of the screen (about 150x150 px, bottom-left corner): it draws the whole map with the walls in color and shows the player as a dot with a line for the direction it is facing. It updates every frame.
 
 ## What scenario 2 adds (only this)
 1. 4 enemies placed on the map, drawn as simple red sprites (canvas shapes, no images).
 2. The sprites scale with distance and are hidden by the walls (use a z-buffer).
 3. The enemies slowly move toward the player. If they touch the player, they take away health.
-4. A simple health bar at the bottom of the screen.
+4. A simple health bar in the bottom-right corner (the minimap takes the left).
 5. At 0 health: the text "GAME OVER". The R key restarts.
 
 ## Process

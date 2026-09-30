@@ -1,4 +1,4 @@
-Build scenario 1 of BUNKER, a classic 90s-style shooter game: a pseudo-3D corridor (raycasting) you can walk through. This is the base; scenarios 2 and 3 will come later.
+Build scenario 1 of BUNKER, a classic 90s-style shooter game: a pseudo-3D maze (raycasting) you can walk through, with a 2D minimap. This is the base; scenarios 2 and 3 will come later.
 
 Do not ask questions: if something is not defined, pick the simplest option and keep going. Move fast, this is a demo of a few minutes. The only exception is the working limit below.
 
@@ -14,15 +14,16 @@ Your only authorized folder is:
 
 ## Deliverable
 - One new file: `scenario-1.html` (HTML + CSS + JavaScript in the same file). No libraries, images, or external audio.
-- At most about 150 lines.
-- At the top of the file, a comment with: the game idea (2 lines), "Scenario 1 of 3", the controls, and the code structure (list of sections: map, player, render, loop).
+- At most about 190 lines.
+- At the top of the file, a comment with: the game idea (2 lines), "Scenario 1 of 3", the controls, and the code structure (list of sections: map, player, render, minimap, loop).
 - On screen: the title "BUNKER · Scenario 1" and one line with the controls.
 
 ## What it must have (only this)
-1. Raycasting over a 12x12 grid map defined in the code.
+1. Raycasting over a 12x12 grid map shaped like a maze (corridors, corners, and dead ends), defined in the code.
 2. Walls in 3 colors, darker on the side faces and with distance. Sky and floor in different colors.
 3. Movement with W and S (or the up and down arrows), turning with A and D (or the left and right arrows), with collision against the walls.
 4. A `requestAnimationFrame` loop and movement independent of frames per second.
+5. A 2D minimap at the bottom of the screen (about 150x150 px, bottom-left corner): it draws the whole map with the walls in color and shows the player as a dot with a line for the direction it is facing. It updates every frame.
 
 ## Process
 1. A plan of at most 3 lines, then continue without waiting for a reply.
@@ -31,7 +32,7 @@ Your only authorized folder is:
 4. Open the game with `open scenario-1.html`.
 
 ## Done when
-The file opens in the browser, you can walk around, and you cannot go through the walls.
+The file opens in the browser, you can walk around without going through the walls, and the minimap shows the player moving.
 
 ## Response format
 Brief. At the end: the controls in 2 lines.
