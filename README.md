@@ -35,7 +35,7 @@ Reset between takes by running the create script again.
 ## Demo 2: a Doom-style game in three scenarios (`demo-2-doom/`)
 
 Files:
-- `1-prompt-es.md` / `1-prompt-en.md`: scenario 1, a 3D maze you can walk through (raycasting) with a 2D minimap. Creates `escenario-1.html` / `scenario-1.html`.
+- `1-prompt-es.md` / `1-prompt-en.md`: scenario 1, a 3D maze you can walk through (raycasting) with a 2D map below the 3D view. Creates `escenario-1.html` / `scenario-1.html`.
 - `2-prompt-es.md` / `2-prompt-en.md`: scenario 2, adds chasing enemies, health and game over. Creates `escenario-2.html` / `scenario-2.html`.
 - `3-prompt-es.md` / `3-prompt-en.md`: scenario 3, adds shooting, ammo and a victory screen. Creates `escenario-3.html` / `scenario-3.html`.
 - `game/`: the only folder the agent may touch.

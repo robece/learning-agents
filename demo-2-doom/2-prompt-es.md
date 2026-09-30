@@ -1,4 +1,4 @@
-Construye el escenario 2 de BUNKER, un juego estilo shooter clásico de los 90: el laberinto en pseudo-3D con minimapa del escenario 1, más enemigos que te persiguen, vida y game over.
+Construye el escenario 2 de BUNKER, un juego estilo shooter clásico de los 90: el laberinto en pseudo-3D con mapa 2D del escenario 1, más enemigos que te persiguen, vida y game over.
 
 No hagas preguntas: si algo no está definido, elige lo más simple y sigue. Ve rápido, esto es una demo de pocos minutos. La única excepción es el límite de trabajo de abajo.
 
@@ -19,7 +19,7 @@ Tu única carpeta autorizada es:
 ## Entregable
 - Un archivo nuevo: `escenario-2.html` (HTML + CSS + JavaScript en el mismo archivo). Sin librerías, imágenes ni audio externos.
 - Máximo unas 270 líneas en total.
-- Al inicio del archivo, un comentario con: la idea del juego (2 líneas), "Escenario 2 de 3", los controles y la estructura del código (lista de secciones: mapa, jugador, enemigos, render, minimapa, bucle).
+- Al inicio del archivo, un comentario con: la idea del juego (2 líneas), "Escenario 2 de 3", los controles y la estructura del código (lista de secciones: mapa, jugador, enemigos, render, mapa 2D, bucle).
 - En pantalla: el título "BUNKER · Escenario 2" y una línea con los controles.
 
 ## Escenario 1 (base)
@@ -27,13 +27,13 @@ Tu única carpeta autorizada es:
 2. Paredes de 3 colores, más oscuras en las caras laterales y con la distancia. Cielo y piso de colores distintos.
 3. Movimiento con W y S (o flechas arriba y abajo), giro con A y D (o flechas izquierda y derecha), con colisión contra las paredes.
 4. Bucle con `requestAnimationFrame` y movimiento independiente de los cuadros por segundo.
-5. Un minimapa 2D en la parte inferior de la pantalla (unos 150x150 px, en la esquina inferior izquierda): dibuja el mapa completo con las paredes en color y muestra al jugador como un punto con una línea que indica hacia dónde mira. Se actualiza en cada cuadro.
+5. Un mapa 2D en un segundo canvas colocado debajo de la vista 3D, del mismo tamaño que ella (por ejemplo 560x315 cada una) y nunca encima de ella. Dibuja el mapa completo del laberinto con celdas cuadradas centradas, las paredes en color y al jugador como un punto con una línea que indica hacia dónde mira. Se actualiza en cada cuadro.
 
 ## Novedades del escenario 2 (solo esto)
 1. 4 enemigos colocados en el mapa, dibujados como sprites simples en rojo (formas del canvas, sin imágenes).
 2. Los sprites escalan con la distancia y quedan tapados por las paredes (usa un z-buffer).
 3. Los enemigos avanzan despacio hacia el jugador. Si lo tocan, le quitan vida.
-4. Una barra de vida simple en la esquina inferior derecha (el minimapa ocupa la izquierda).
+4. Una barra de vida simple en la parte inferior de la vista 3D.
 5. Con la vida en 0: texto "GAME OVER". La tecla R reinicia.
 
 ## Proceso
