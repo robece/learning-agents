@@ -64,3 +64,7 @@ The agent must run `pwd` first and stop if it is not in that folder, keep to rel
 - Pick the model before the session and keep it: Sonnet for speed, Opus if you prefer higher first-try success.
 - Keep a short screen recording of a good run as a backup in case the network fails.
 - Requires Node (for `node --check`) and Python 3.
+
+## Security
+
+See [`docs/security.md`](docs/security.md): exposure, who or what signs in, credentials and where they live, exceptions and gaps.
